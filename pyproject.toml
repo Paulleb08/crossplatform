@@ -21,3 +21,4 @@ where = ["src"]
 strict = true
 python_version = "3.11"
 mypy_path = "src"
+files = ["src"]

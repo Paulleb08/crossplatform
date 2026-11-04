@@ -114,31 +114,40 @@ brew install winetricks</div>
     <div class="phase-head">
       <div class="eyebrow">Partie 2 · pour chaque programme · ~5 min</div>
       <h2>Lancer votre .exe avec Cellier</h2>
-      <p class="note">Une <strong>bouteille</strong> est un faux disque Windows 10 rangé dans un dossier. Elle est isolée du reste du Mac, et vous pouvez en avoir une par jeu. Les commandes <code>cellier</code> arrivent au fil des jalons du projet.</p>
+      <p class="note">Une <strong>bouteille</strong> est un faux disque Windows 10 rangé dans un dossier. Elle est isolée du reste du Mac, et vous pouvez en avoir une par jeu.</p>
     </div>
     <ol class="steps" style="--start:5">
+      <li class="step" data-id="s5b">
+        <div class="step-title"><h3>Installer Cellier</h3><span class="chip ok">Disponible</span></div>
+        <p>Une seule fois. Cellier n'a besoin que du Python fourni avec macOS. Vérifiez ensuite que la commande répond.</p>
+        <div class="term">git clone https://github.com/paulleb08/crossplatform ~/cellier
+pip3 install --user ~/cellier
+cellier list</div>
+        <p class="note">Si <code>cellier</code> est introuvable, ajoutez <code>~/Library/Python/3.x/bin</code> à votre PATH. Vous pouvez aussi utiliser <code>python3 -m cellier</code> depuis le dossier <code>~/cellier/src</code>.</p>
+      </li>
       <li class="step" data-id="s6">
-        <div class="step-title"><h3>Créer une bouteille</h3><span class="chip soon">Jalon 1</span></div>
+        <div class="step-title"><h3>Créer une bouteille</h3><span class="chip ok">Disponible</span></div>
         <p>Cellier crée un Windows 10 64-bit et installe Visual C++ 2015-2022, les polices Windows et <code>d3dcompiler_47</code>. Comptez quelques minutes la première fois.</p>
         <div class="term">cellier create MesJeux</div>
       </li>
       <li class="step" data-id="s7">
-        <div class="step-title"><h3>Installer ou lancer votre programme</h3><span class="chip soon">Jalon 3</span></div>
+        <div class="step-title"><h3>Installer ou lancer votre programme</h3><span class="chip ok">Disponible</span></div>
         <p>Glissez le fichier dans le Terminal après le nom de la bouteille pour coller son chemin. Cellier accepte <code>.exe</code>, <code>.msi</code> et les images disque <code>.iso</code>, qu'il monte tout seul.</p>
         <div class="term">cellier run MesJeux ~/Downloads/setup.exe</div>
       </li>
       <li class="step" data-id="s8">
-        <div class="step-title"><h3>Créer une icône pour lancer en un clic</h3><span class="chip soon">Jalon 4</span></div>
+        <div class="step-title"><h3>Créer une icône pour lancer en un clic</h3><span class="chip ok">Disponible</span></div>
         <p>Indiquez le chemin du programme installé, côté Windows. L'app apparaît dans <code>~/Applications/Cellier</code> : glissez-la dans le Dock.</p>
         <div class="term">cellier shortcut MesJeux "C:\Games\MonJeu\MonJeu.exe" --name "Mon Jeu"</div>
       </li>
       <li class="step" data-id="s9">
-        <div class="step-title"><h3>Si l'image est noire ou le jeu plante</h3><span class="chip soon">Jalon 2</span></div>
+        <div class="step-title"><h3>Si l'image est noire ou le jeu plante</h3><span class="chip ok">Disponible</span></div>
         <p>Changez de moteur graphique sans recréer la bouteille, puis relancez.</p>
         <div class="term"><span class="c"># DirectX 9/10/11 récalcitrant : essayer DXVK</span>
 cellier config MesJeux --graphics dxvk --sync esync
 <span class="c"># Revenir au réglage par défaut (DirectX 11/12)</span>
 cellier config MesJeux --graphics d3dmetal --sync msync</div>
+        <p class="note">Pour DXVK, déposez d'abord les DLL x64 de <a href="https://github.com/Gcenx/DXVK-macOS">DXVK-macOS</a> (<code>d3d11.dll</code>, <code>d3d10core.dll</code>, <code>dxgi.dll</code>) dans <code>~/Library/Application Support/Cellier/Components/dxvk/x64</code>. Le retour à D3DMetal restaure les DLL d'origine.</p>
       </li>
     </ol>
   </section>

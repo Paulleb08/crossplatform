@@ -19,6 +19,8 @@ Uniquement des briques libres (Wine, DXVK, MoltenVK, Winetricks) et les outils g
 ```
 src/cellier/
   core/            # moteur pur, testable sans Wine (aucun import de cli/)
+    errors.py      # CellierError et sous-classes
+    process.py     # exécution capturée des outils (wine64, winetricks, hdiutil)
     paths.py       # chemins ~/Library/Application Support/Cellier, ~/Library/Logs/Cellier
     log.py         # configuration logging (fichier + console)
     prefix.py      # Jalon 1 : création/liste/suppression des préfixes WINEPREFIX
@@ -37,19 +39,19 @@ lisible par une machine passe donc par des dataclasses sérialisables, jamais pa
 
 ## Emplacements sur le Mac
 
-- Bouteilles : `~/Library/Application Support/Cellier/Bottles/<nom>/` (contient `prefix/` + `bottle.toml`)
+- Bouteilles : `~/Library/Application Support/Cellier/Bottles/<nom>/` (contient `prefix/` + `bottle.json`)
 - Logs : `~/Library/Logs/Cellier/<bouteille>/<date>.log`
 - Raccourcis : `~/Applications/Cellier/<App>.app`
 - Toute racine est surchargeable par `CELLIER_HOME` (indispensable pour les tests).
 
 ## Règles de code
 
-- Python 3.11+, **bibliothèque standard uniquement** (pas de pip). `tomllib` pour lire le TOML.
+- Python 3.11+, **bibliothèque standard uniquement** (pas de pip). Config en JSON (lecture et écriture en stdlib).
 - Typage strict : chaque fonction est annotée, `mypy --strict` doit passer.
 - `pathlib.Path` partout, jamais de chemins en chaînes concaténées.
 - Sous-processus : `subprocess.run([...], check=False, capture_output=True, text=True, stdin=DEVNULL)`.
   Jamais `shell=True`. Le code retour est toujours vérifié.
-- Erreurs : une hiérarchie `CellierError` (dans `core/errors.py`) avec des sous-classes précises
+- Erreurs : une hiérarchie `CellierError` (`core/errors.py`) avec des sous-classes précises
   (`WineNotFound`, `BottleExists`, `BottleNotFound`, `MountFailed`…). La CLI les attrape,
   affiche un message clair et sort avec un code ≠ 0. Pas de `except Exception` silencieux.
 - Logs via `logging.getLogger(__name__)`, jamais `print` dans `core/`.
@@ -59,7 +61,21 @@ lisible par une machine passe donc par des dataclasses sérialisables, jamais pa
 ## Commandes
 
 ```bash
-PYTHONPATH=src python3 -m unittest discover -s tests -v   # tests
-python3 -m mypy                                           # typage (outil de dev optionnel)
-PYTHONPATH=src python3 -m cellier.cli --help              # CLI (à partir du Jalon 4)
+PYTHONPATH=src:tests python3 -m unittest discover -s tests   # tests (faux Wine, tourne aussi sous Linux)
+python3 -m mypy                                              # typage strict (pip install mypy, outil de dev)
+PYTHONPATH=src python3 -m cellier --help                     # CLI
 ```
+
+Variables utiles : `CELLIER_HOME` (racine unique, tests), `CELLIER_WINE`, `CELLIER_WINETRICKS`, `CELLIER_DXVK` (dossier des DLL x64 DXVK).
+
+## Leçons apprises (à relire avant de travailler, à compléter après chaque erreur)
+
+Une ligne par leçon : l'erreur, puis la règle.
+
+- Hook GateGuard (Bash/Write) : il bloque le premier appel tant que les faits ne sont pas donnés. Annoncer la demande et le but de la commande dès le premier message, puis enchaîner les fichiers via `cat <<'EOF'` dans un seul appel Bash.
+- Un `/goal` qui décrit le produit complet ne s'arrête pas à un squelette et une demande de feu vert. Livrer les fonctionnalités et les tests dans la même session.
+- Bascule DXVK appelée deux fois : la DLL DXVK était sauvegardée comme originale. Une sauvegarde ne se fait qu'au premier passage. Tester toute opération réversible par un aller-retour et un double appel.
+- `mypy` sans `files` dans `pyproject.toml` sort en erreur. Garder `files = ["src"]`.
+- Économie de tokens : regrouper les écritures de fichiers, lancer tests et mypy dans le même appel, ne pas relire un fichier qu'on vient d'écrire, éditer par un remplacement ciblé plutôt que tout réécrire.
+- Noms de paquets Homebrew tiers (`gcenx/wine/...`) non vérifiables hors ligne : les signaler comme à confirmer, ne pas les présenter comme sûrs.
+- `rm -rf` dans une commande déclenche le hook destructif. Les artefacts de build sont déjà dans `.gitignore` : ne pas les supprimer, ne jamais mêler suppression et commit.

@@ -1,34 +1,36 @@
 # Feuille de route
 
 Quatre jalons autonomes. Chacun se livre avec ses tests verts et ne dépend que des jalons précédents.
-Le Jalon 1 inclut le socle commun (`errors.py`, `paths.py`, `log.py`).
+Le Jalon 1 inclut le socle commun (`errors.py`, `paths.py`, `log.py`, `process.py`).
 
-## Jalon 1 : gestionnaire de préfixes WINEPREFIX
+**État : les 4 jalons sont implémentés et testés avec un faux Wine (25 tests, mypy strict). Reste à valider sur un vrai Mac Apple Silicon.**
+
+## ✅ Jalon 1 : gestionnaire de préfixes WINEPREFIX
 
 **Modules**
 - `core/errors.py` : `CellierError` et ses sous-classes.
 - `core/paths.py` : racines Application Support / Logs, surcharge `CELLIER_HOME`, détection de `wine64` et `winetricks` (PATH, puis emplacements Homebrew `/opt/homebrew/bin`, puis `CELLIER_WINE`).
 - `core/log.py` : logger fichier + console.
 - `core/prefix.py` : `create(name)`, `list()`, `get(name)`, `delete(name)`.
-  Création : `WINEARCH=win64 WINEPREFIX=… wineboot --init`, puis version Windows 10 (`winecfg -v win10`), puis écriture de `bottle.toml`.
+  Création : `WINEARCH=win64 WINEPREFIX=… wineboot --init`, puis version Windows 10 (`winecfg -v win10`), puis écriture de `bottle.json`.
 - `core/deps.py` : `install(bottle, verbs=("vcrun2022", "corefonts", "d3dcompiler_47"))` via `winetricks -q`.
 
 **Tests exigés**
-- création : bon environnement passé à `wineboot`, `bottle.toml` écrit, refus si le nom existe déjà ;
+- création : bon environnement passé à `wineboot`, `bottle.json` écrit, refus si le nom existe déjà ;
 - noms invalides refusés (`../x`, vide, `/`) ;
-- `list()` lit les bouteilles existantes et ignore les dossiers sans `bottle.toml` ;
+- `list()` lit les bouteilles existantes et ignore les dossiers sans `bottle.json` ;
 - `delete()` refuse un chemin hors de la racine Cellier ;
 - Wine ou Winetricks introuvable → `WineNotFound` avec un message qui dit comment l'installer ;
 - échec de `winetricks` → erreur remontée avec la fin de son log.
 
-## Jalon 2 : couche graphique D3DMetal / DXVK et MSync / ESync
+## ✅ Jalon 2 : couche graphique D3DMetal / DXVK et MSync / ESync
 
 **Modules**
 - `core/graphics.py` :
   - `set_backend(bottle, "d3dmetal" | "dxvk")` : copie ou retire les DLL concernées (`d3d11`, `d3d12`, `dxgi`, `d3d10core`) dans `system32` et met à jour `WINEDLLOVERRIDES` ;
   - `set_sync(bottle, "msync" | "esync" | "off")` ;
-  - `env_for(bottle) -> dict[str, str]` : variables d'environnement calculées depuis `bottle.toml` (`WINEMSYNC`, `WINEESYNC`, `WINEDLLOVERRIDES`, `DXVK_HUD`…).
-- La bascule est à chaud : elle ne touche que `bottle.toml` et les DLL, sans recréer le préfixe.
+  - `env_for(bottle) -> dict[str, str]` : variables d'environnement calculées depuis `bottle.json` (`WINEMSYNC`, `WINEESYNC`, `WINEDLLOVERRIDES`, `DXVK_HUD`…).
+- La bascule est à chaud : elle ne touche que `bottle.json` et les DLL, sans recréer le préfixe.
 
 **Tests exigés**
 - `env_for` pour chaque combinaison backend × sync (table de cas) ;
@@ -36,7 +38,7 @@ Le Jalon 1 inclut le socle commun (`errors.py`, `paths.py`, `log.py`).
 - refus clair si les fichiers GPTK ou DXVK sont absents ;
 - MSync et ESync ne sont jamais actifs en même temps.
 
-## Jalon 3 : runner de processus et médias
+## ✅ Jalon 3 : runner de processus et médias
 
 **Modules**
 - `core/media.py` : `detect(path)` renvoie `exe`, `msi` ou `iso` (extension puis signature : `MZ` pour exe, OLE pour msi, `CD001` pour ISO).
@@ -50,7 +52,7 @@ Le Jalon 1 inclut le socle commun (`errors.py`, `paths.py`, `log.py`).
 - `run` : commande et environnement exacts (faux `wine64`), log créé, code retour propagé ;
 - un chemin Windows avec espaces reste un seul argument.
 
-## Jalon 4 : CLI et raccourcis Mac
+## ✅ Jalon 4 : CLI et raccourcis Mac
 
 **Modules**
 - `cli/__init__.py` : sous-commandes
