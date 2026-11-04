@@ -24,7 +24,7 @@ class FakeWineCase(unittest.TestCase):
     def setUp(self) -> None:
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
-        self.home = Path(tmp.name)
+        self.home = Path(tmp.name).resolve()  # macOS : /var -> /private/var
         bindir = self.home / "bin"
         bindir.mkdir()
         for tool in ("wine64", "wineserver", "winetricks"):

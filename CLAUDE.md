@@ -89,3 +89,5 @@ Une ligne par leçon : l'erreur, puis la règle.
   - un PATH Homebrew explicite pour winetricks lancé depuis une `.app`.
 - Faire relire par un sous-agent avant de déclarer « fini » : une revue ciblée coûte peu de tokens et attrape ce que les tests écrits par l'auteur ne couvrent pas.
 - Un ` : ` dans une valeur YAML non quotée invalide tout le workflow (0 job lancé). Mettre les valeurs entre guillemets et valider avec `python3 -c "import yaml; yaml.safe_load(open(F))"` avant de pousser.
+- macOS : `/var` est un lien vers `/private/var`. Dans les tests, toujours `.resolve()` les dossiers temporaires avant de comparer des chemins. La CI macOS l'a trouvé, pas Linux.
+- Homebrew a retiré `brew install --cask --no-quarantine`. Utiliser `--cask`, puis `xattr -dr com.apple.quarantine` sur l'app. Vérifier toute commande tierce dans une CI réelle avant de la documenter.

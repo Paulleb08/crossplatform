@@ -13,7 +13,9 @@ if ! command -v brew >/dev/null && [ ! -x /opt/homebrew/bin/brew ]; then
   echo "== Homebrew"; /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 eval "$(/opt/homebrew/bin/brew shellenv)"
-echo "== Wine + D3DMetal"; brew install --cask --no-quarantine gcenx/wine/game-porting-toolkit
+echo "== Wine + D3DMetal"; brew install --cask gcenx/wine/game-porting-toolkit
+# Homebrew a retiré --no-quarantine : on lève la quarantaine Gatekeeper sur l'app Wine installée.
+xattr -dr com.apple.quarantine /Applications/*Wine*.app "/Applications/Game Porting Toolkit.app" 2>/dev/null || true
 echo "== Winetricks"; brew install winetricks
 echo; echo "Terminé. Revenez dans Cellier et cliquez sur « Vérifier à nouveau »."
 """

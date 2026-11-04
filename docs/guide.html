@@ -98,9 +98,9 @@ footer { font-size: 0.9rem; color: var(--muted); border-top: 1px solid var(--lin
       <li class="step" data-id="s4">
         <div class="step-title"><h3>Installer Wine avec D3DMetal, puis Winetricks</h3><span class="chip ok">Disponible</span></div>
         <p>Ce paquet regroupe Wine et la couche D3DMetal du Game Porting Toolkit d'Apple. Winetricks installe les composants Windows (Visual C++, polices…).</p>
-        <div class="term">brew install --cask --no-quarantine gcenx/wine/game-porting-toolkit
+        <div class="term">brew install --cask gcenx/wine/game-porting-toolkit
 brew install winetricks</div>
-        <p class="note">Autre option : télécharger le Game Porting Toolkit sur <a href="https://developer.apple.com/games/game-porting-toolkit/">developer.apple.com</a> (compte Apple gratuit).</p>
+        <p class="note">Si macOS bloque Wine au premier lancement : <code>xattr -dr com.apple.quarantine "/Applications/Game Porting Toolkit.app"</code>. Autre option : télécharger le Game Porting Toolkit sur <a href="https://developer.apple.com/games/game-porting-toolkit/">developer.apple.com</a> (compte Apple gratuit).</p>
       </li>
       <li class="step" data-id="s5">
         <div class="step-title"><h3>Facultatif : DXVK pour les jeux récalcitrants</h3><span class="chip ok">Disponible</span></div>

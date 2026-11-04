@@ -89,7 +89,7 @@ jobs:
       - name: Installer Rosetta, Wine (GPTK) et Winetricks
         run: |
           softwareupdate --install-rosetta --agree-to-license || true
-          brew install --cask --no-quarantine gcenx/wine/game-porting-toolkit
+          brew install --cask gcenx/wine/game-porting-toolkit
           brew install winetricks
       - name: Créer une bouteille réelle (avec vcrun2022, corefonts, d3dcompiler_47)
         run: PYTHONPATH=src python -m cellier -v create E2E

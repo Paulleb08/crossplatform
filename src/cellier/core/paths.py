@@ -6,7 +6,7 @@ from pathlib import Path
 
 from .errors import WineNotFound
 
-INSTALL_HINT = "Installez-le : brew install --cask --no-quarantine gcenx/wine/game-porting-toolkit"
+INSTALL_HINT = "Installez-le : brew install --cask gcenx/wine/game-porting-toolkit"
 SEARCH_DIRS = [
     Path("/opt/homebrew/bin"),
     Path("/usr/local/bin"),
