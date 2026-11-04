@@ -45,3 +45,28 @@ class GraphicsTest(FakeWineCase):
             graphics.configure(b, "opengl")
         with self.assertRaises(InvalidSetting):
             graphics.configure(b, sync="fsync")
+
+
+class BackupSafetyTest(FakeWineCase):
+    def test_failed_switch_keeps_originals_recoverable(self) -> None:
+        b = prefix.create("Jeux")
+        dxvk = self.home / "dxvk"
+        dxvk.mkdir()
+        for d in graphics.DX_DLLS:
+            (dxvk / d).write_text("dxvk")
+        real_copy = graphics.shutil.copy2
+        calls = {"n": 0}
+
+        def flaky(src, dst):  # type: ignore[no-untyped-def]
+            calls["n"] += 1
+            if calls["n"] == 2:
+                raise OSError("disque plein")
+            return real_copy(src, dst)
+
+        from unittest import mock
+        with mock.patch.object(graphics.shutil, "copy2", flaky), self.assertRaises(OSError):
+            graphics.configure(b, "dxvk")
+        self.assertFalse((b.path / graphics.BACKUP).exists())
+        graphics.configure(b, "dxvk")
+        graphics.configure(b, "d3dmetal")
+        self.assertEqual((b.system32 / "d3d11.dll").read_text(), "builtin\n")

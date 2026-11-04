@@ -79,3 +79,12 @@ Une ligne par leçon : l'erreur, puis la règle.
 - Économie de tokens : regrouper les écritures de fichiers, lancer tests et mypy dans le même appel, ne pas relire un fichier qu'on vient d'écrire, éditer par un remplacement ciblé plutôt que tout réécrire.
 - Noms de paquets Homebrew tiers (`gcenx/wine/...`) non vérifiables hors ligne : les signaler comme à confirmer, ne pas les présenter comme sûrs.
 - `rm -rf` dans une commande déclenche le hook destructif. Les artefacts de build sont déjà dans `.gitignore` : ne pas les supprimer, ne jamais mêler suppression et commit.
+- Revue par sous-agent, 8 bugs trouvés. Règles retenues :
+  - l'identité d'une bouteille vient du dossier, jamais du JSON ;
+  - `wineserver -k` avant tout `rmtree` d'un préfixe ;
+  - `WINEDLLOVERRIDES=mscoree,mshtml=` au `wineboot`, sinon une fenêtre Mono/Gecko bloque ;
+  - chaque appel externe a un `timeout` ;
+  - filtrer les variables `WINE*` du shell ;
+  - les sauvegardes s'écrivent dans un `.tmp` puis par `rename` (atomique) ;
+  - un PATH Homebrew explicite pour winetricks lancé depuis une `.app`.
+- Faire relire par un sous-agent avant de déclarer « fini » : une revue ciblée coûte peu de tokens et attrape ce que les tests écrits par l'auteur ne couvrent pas.

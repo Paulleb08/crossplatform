@@ -43,13 +43,16 @@ def _install_dxvk(b: Bottle) -> None:
             f"DLL DXVK absentes dans {src} : {', '.join(missing)}. Copiez-y les DLL x64 de DXVK-macOS "
             "(github.com/Gcenx/DXVK-macOS) ou indiquez leur dossier avec CELLIER_DXVK.")
     backup = b.path / BACKUP
-    first = not backup.exists()  # déjà sous DXVK : ne pas sauvegarder les DLL DXVK comme originales
-    backup.mkdir(exist_ok=True)
+    if not backup.exists():  # déjà sous DXVK : ne pas sauvegarder les DLL DXVK comme originales
+        tmp = b.path / f"{BACKUP}.tmp"
+        shutil.rmtree(tmp, ignore_errors=True)
+        tmp.mkdir()
+        for d in DX_DLLS:
+            if (b.system32 / d).exists():
+                shutil.copy2(b.system32 / d, tmp / d)
+        tmp.rename(backup)  # sauvegarde complète ou absente, jamais partielle
     for d in DX_DLLS:
-        dst = b.system32 / d
-        if first and dst.exists():
-            shutil.copy2(dst, backup / d)
-        shutil.copy2(src / d, dst)
+        shutil.copy2(src / d, b.system32 / d)
 
 
 def _restore_builtin(b: Bottle) -> None:

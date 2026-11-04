@@ -4,23 +4,16 @@ import logging
 import re
 import shlex
 import subprocess
-from collections.abc import Mapping, Sequence
+from collections.abc import Sequence
 from datetime import datetime
 from pathlib import Path
 
-from . import graphics, media, paths
+from . import graphics, media, paths, process
 from .errors import CellierError, CommandFailed
 from .prefix import Bottle, base_env
 
 log = logging.getLogger(__name__)
 WIN_PATH = re.compile(r"^[A-Za-z]:\\")
-
-
-def _wineserver(env: Mapping[str, str], flag: str) -> None:
-    server = paths.wineserver()
-    if server:
-        subprocess.run([str(server), flag], env=env, stdin=subprocess.DEVNULL,
-                       capture_output=True, check=False)
 
 
 def _windows_cwd(b: Bottle, target: str) -> Path:
@@ -63,10 +56,13 @@ def launch(b: Bottle, target: str, args: Sequence[str] = ()) -> int:
             raise CommandFailed(f"impossible de lancer Wine : {e}") from e
         try:
             code = proc.wait()
-            _wineserver(env, "-w")  # attend les processus enfants (installeurs, lanceurs)
+            process.wineserver(env, "-w")  # attend les processus enfants (installeurs, lanceurs)
         except KeyboardInterrupt:
-            _wineserver(env, "-k")
-            proc.wait()
+            process.wineserver(env, "-k")
+            try:
+                proc.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                proc.kill()
             code = 130
     if code:
         log.warning("Terminé avec le code %d. Détails : %s", code, log_path)

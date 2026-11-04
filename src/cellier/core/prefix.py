@@ -52,8 +52,12 @@ def validate_name(name: str) -> None:
         raise InvalidName(f"nom invalide : {name!r} (lettres, chiffres, espace, . _ -, 64 max)")
 
 
+LEAKY_VARS = ("WINELOADER", "WINEDLLOVERRIDES", "WINEESYNC", "WINEMSYNC", "WINESERVER")
+
+
 def base_env(b: Bottle) -> dict[str, str]:
-    return {**os.environ, "WINEPREFIX": str(b.prefix), "WINEARCH": "win64",
+    env = {k: v for k, v in os.environ.items() if k not in LEAKY_VARS}  # réglages du shell ≠ réglages de la bouteille
+    return {**env, "WINEPREFIX": str(b.prefix), "WINEARCH": "win64",
             "WINEDEBUG": os.environ.get("WINEDEBUG", "-all")}
 
 
@@ -63,15 +67,22 @@ def create(name: str) -> Bottle:
     if b.path.exists():
         raise BottleExists(f"la bouteille {name!r} existe déjà")
     wine = str(paths.wine())
-    b.path.mkdir(parents=True)
     try:
-        env = base_env(b)
+        b.path.mkdir(parents=True)
+    except FileExistsError as e:
+        raise BottleExists(f"la bouteille {name!r} existe déjà") from e
+    # Sans mscoree/mshtml, wineboot ne propose pas de télécharger Mono/Gecko dans une fenêtre bloquante.
+    env = {**base_env(b), "WINEDLLOVERRIDES": "mscoree,mshtml="}
+    try:
         log.info("Initialisation du préfixe Windows 64-bit…")
-        process.call([wine, "wineboot", "--init"], env)
+        process.call([wine, "wineboot", "--init"], env, timeout=300)
+        process.wineserver(env, "-w")
         log.info("Réglage sur Windows 10…")
-        process.call([wine, "winecfg", "-v", "win10"], env)
+        process.call([wine, "winecfg", "-v", "win10"], env, timeout=120)
+        process.wineserver(env, "-w")
         b.save()
     except BaseException:
+        process.wineserver(env, "-k")  # sinon wineserver réécrit dans le dossier pendant sa suppression
         shutil.rmtree(b.path, ignore_errors=True)  # pas de bouteille à moitié créée
         raise
     log.info("Bouteille %r créée : %s", name, b.path)
@@ -80,7 +91,8 @@ def create(name: str) -> Bottle:
 
 def _load(cfg: Path) -> Bottle:
     data = json.loads(cfg.read_text(encoding="utf-8"))
-    return Bottle(**{k: str(data[k]) for k in ("name", "graphics", "sync", "created") if k in data})
+    fields = {k: str(data[k]) for k in ("graphics", "sync", "created") if k in data}
+    return Bottle(name=cfg.parent.name, **fields)  # le dossier fait foi : un JSON copié ou édité ne doit pas viser une autre bouteille
 
 
 def get(name: str) -> Bottle:
@@ -88,7 +100,10 @@ def get(name: str) -> Bottle:
     cfg = paths.bottles_dir() / name / CONFIG
     if not cfg.is_file():
         raise BottleNotFound(f"bouteille {name!r} introuvable (voir : cellier list)")
-    return _load(cfg)
+    try:
+        return _load(cfg)
+    except (ValueError, TypeError, AttributeError) as e:
+        raise CellierError(f"configuration illisible : {cfg} ({e})") from e
 
 
 def list_bottles() -> list[Bottle]:
@@ -99,7 +114,7 @@ def list_bottles() -> list[Bottle]:
     for cfg in sorted(root.glob(f"*/{CONFIG}")):
         try:
             out.append(_load(cfg))
-        except (ValueError, TypeError, KeyError) as e:
+        except (ValueError, TypeError, AttributeError) as e:
             log.warning("configuration illisible ignorée : %s (%s)", cfg, e)
     return out
 
@@ -109,5 +124,6 @@ def delete(name: str) -> None:
     target, root = b.path.resolve(), paths.bottles_dir().resolve()
     if target.parent != root:
         raise CellierError(f"refus de supprimer {target} : hors de {root}")
+    process.wineserver(base_env(b), "-k")
     shutil.rmtree(target)
     log.info("Bouteille %r supprimée", name)

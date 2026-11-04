@@ -3,7 +3,7 @@
 Quatre jalons autonomes. Chacun se livre avec ses tests verts et ne dépend que des jalons précédents.
 Le Jalon 1 inclut le socle commun (`errors.py`, `paths.py`, `log.py`, `process.py`).
 
-**État : les 4 jalons sont implémentés et testés avec un faux Wine (25 tests, mypy strict). Reste à valider sur un vrai Mac Apple Silicon.**
+**État : les 4 jalons sont implémentés et testés avec un faux Wine (30 tests, mypy strict). Reste à valider sur un vrai Mac Apple Silicon.**
 
 ## ✅ Jalon 1 : gestionnaire de préfixes WINEPREFIX
 

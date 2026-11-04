@@ -56,3 +56,32 @@ class PrefixTest(FakeWineCase):
         b = prefix.create("Jeux")
         deps.install(b)
         self.assertIn("ARG:-q\nARG:vcrun2022\nARG:corefonts\nARG:d3dcompiler_47", self.calls())
+
+
+class SafetyTest(FakeWineCase):
+    def test_copied_folder_never_targets_original(self) -> None:
+        import shutil
+        a = prefix.create("A")
+        shutil.copytree(a.path, paths.bottles_dir() / "B")
+        self.assertEqual(prefix.get("B").name, "B")
+        prefix.delete("B")
+        self.assertTrue(a.path.exists())
+
+    def test_corrupt_config_is_readable_error(self) -> None:
+        from cellier.core.errors import CellierError
+        b = prefix.create("A")
+        (b.path / "bottle.json").write_text("{pas du json")
+        with self.assertRaises(CellierError):
+            prefix.get("A")
+
+    def test_shell_wine_vars_do_not_leak(self) -> None:
+        import os
+        os.environ["WINEDLLOVERRIDES"] = "d3d11=n"
+        os.environ["WINEESYNC"] = "1"
+        env = prefix.base_env(prefix.Bottle("A"))
+        self.assertNotIn("WINEESYNC", env)
+        self.assertNotIn("WINEDLLOVERRIDES", env)
+
+    def test_create_disables_mono_gecko_prompt(self) -> None:
+        prefix.create("A")
+        self.assertIn("|mscoree,mshtml=|", self.calls().split("ARG:wineboot")[0])

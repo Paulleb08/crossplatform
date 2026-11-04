@@ -3,6 +3,7 @@
 import argparse
 import json
 import logging
+import shlex
 import sys
 from collections.abc import Callable
 
@@ -17,7 +18,12 @@ def _create(a: argparse.Namespace) -> int:
     b = prefix.create(a.name)
     graphics.configure(b, a.graphics, a.sync)
     if not a.no_deps:
-        deps.install(b)
+        try:
+            deps.install(b)
+        except CellierError as e:
+            raise CellierError(f"bouteille {b.name!r} créée, mais les composants Windows ont échoué. "
+                               f"Réessayez : WINEPREFIX={shlex.quote(str(b.prefix))} winetricks -q "
+                               f"{' '.join(deps.DEFAULT_VERBS)}\n{e}") from e
     print(f"Prête. Lancez un programme : cellier run {b.name!r} ~/Downloads/setup.exe")
     return 0
 
