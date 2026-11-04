@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cellier"
-version = "0.0.1"
+version = "0.1.0"
 description = "Gestionnaire de bouteilles Wine/GPTK open source pour macOS Apple Silicon"
 readme = "README.md"
 license = { text = "MIT" }
@@ -13,6 +13,9 @@ dependencies = []  # stdlib uniquement, volontairement
 
 [project.scripts]
 cellier = "cellier.cli:main"
+
+[project.gui-scripts]
+cellier-gui = "cellier.gui:run"
 
 [tool.setuptools.packages.find]
 where = ["src"]

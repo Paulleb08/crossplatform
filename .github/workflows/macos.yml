@@ -1,0 +1,106 @@
+name: macOS (Apple Silicon) : tests, app et DMG
+
+on:
+  push:
+    branches: [main, "claude/**"]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-14   # Apple Silicon (M1)
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Tests unitaires sur macOS
+        run: PYTHONPATH=src:tests python -m unittest discover -s tests -v
+
+      - name: Montage ISO réel avec hdiutil
+        run: |
+          mkdir -p "$RUNNER_TEMP/isosrc" && printf 'MZ' > "$RUNNER_TEMP/isosrc/setup.exe"
+          hdiutil makehybrid -iso -joliet -o "$RUNNER_TEMP/test.iso" "$RUNNER_TEMP/isosrc"
+          PYTHONPATH=src python - <<'PY'
+          import os
+          from pathlib import Path
+          from cellier.core import media
+          iso = Path(os.environ["RUNNER_TEMP"]) / "test.iso"
+          assert media.detect(iso) == "iso"
+          with media.mount(iso) as point:
+              found = media.find_installer(point)
+              print("monté sur", point, "->", found)
+              assert found.name.lower() == "setup.exe"
+          assert not point.exists() or not any(point.iterdir()), "non démonté"
+          print("OK : montage ISO réel")
+          PY
+
+      - name: Interface graphique (ouverture puis fermeture)
+        run: |
+          CELLIER_HOME="$RUNNER_TEMP/gui" PYTHONPATH=src python - <<'PY'
+          import tkinter as tk
+          from cellier.gui import App
+          root = tk.Tk()
+          App(root)
+          root.after(2000, root.destroy)
+          root.mainloop()
+          print("OK : interface")
+          PY
+
+      - name: Construire Cellier.app
+        run: |
+          pip install pyinstaller==6.11.1
+          pyinstaller --noconfirm --windowed --name Cellier \
+            --osx-bundle-identifier org.cellier.app --paths src packaging/cellier_app.py
+          dist/Cellier.app/Contents/MacOS/Cellier --version
+          CELLIER_HOME="$RUNNER_TEMP/app" dist/Cellier.app/Contents/MacOS/Cellier list
+
+      - name: Créer Cellier.dmg
+        run: |
+          mkdir dmg && cp -R dist/Cellier.app dmg/ && ln -s /Applications dmg/Applications
+          hdiutil create -volname Cellier -srcfolder dmg -ov -format UDZO Cellier.dmg
+          hdiutil verify Cellier.dmg
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Cellier-dmg
+          path: Cellier.dmg
+
+      - name: Publier la release (tags v*)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Cellier.dmg
+
+  wine-e2e:
+    # Essai réel avec Wine/GPTK. Lourd et dépendant de paquets tiers : n'empêche pas la publication du DMG.
+    runs-on: macos-14
+    continue-on-error: true
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Installer Rosetta, Wine (GPTK) et Winetricks
+        run: |
+          softwareupdate --install-rosetta --agree-to-license || true
+          brew install --cask --no-quarantine gcenx/wine/game-porting-toolkit
+          brew install winetricks
+      - name: Créer une bouteille réelle (avec vcrun2022, corefonts, d3dcompiler_47)
+        run: PYTHONPATH=src python -m cellier -v create E2E
+      - name: Lancer un programme Windows réel
+        run: |
+          PYTHONPATH=src python -m cellier run E2E 'C:\windows\system32\cmd.exe' /c ver
+          cat ~/Library/Logs/Cellier/E2E/*.log
+      - name: Bascule graphique et suppression
+        run: |
+          PYTHONPATH=src python -m cellier config E2E --sync esync
+          PYTHONPATH=src python -m cellier delete E2E --yes
+      - name: Journaux en cas d'échec
+        if: failure()
+        run: cat ~/Library/Logs/Cellier/cellier.log || true

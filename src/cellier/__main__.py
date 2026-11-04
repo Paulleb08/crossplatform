@@ -1,5 +1,3 @@
-import sys
+from cellier.app import main
 
-from cellier.cli import main
-
-sys.exit(main())
+main()
