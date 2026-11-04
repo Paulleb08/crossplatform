@@ -1,0 +1,199 @@
+<title>Guide Cellier</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Mise en page : une colonne de lecture, étapes numérotées le long d'un fil vertical, code en blocs terminal. */
+:root {
+  --bg: #f6f6f8; --surface: #ffffff; --fg: #1d1b22; --muted: #5d5a68; --line: #dcdae3;
+  --wine: #7a1f3d; --wine-soft: #f3e4ea; --term-bg: #1e1c24; --term-fg: #e9e6f0; --ok: #1f7a4d; --soon: #8a5a00; --soon-bg: #fbf0d9; --ok-bg: #e2f3ea;
+  --display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --body: "Source Sans 3", -apple-system, "Helvetica Neue", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #141318; --surface: #1c1b22; --fg: #ece9f2; --muted: #a29eae; --line: #2f2d38;
+  --wine: #e07a9b; --wine-soft: #3a1f2a; --term-bg: #0d0c10; --term-fg: #e9e6f0; --ok: #6fd3a0; --soon: #f0c36a; --soon-bg: #3a2f17; --ok-bg: #173327; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #141318; --surface: #1c1b22; --fg: #ece9f2; --muted: #a29eae; --line: #2f2d38;
+  --wine: #e07a9b; --wine-soft: #3a1f2a; --term-bg: #0d0c10; --term-fg: #e9e6f0; --ok: #6fd3a0; --soon: #f0c36a; --soon-bg: #3a2f17; --ok-bg: #173327; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font: 17px/1.6 var(--body); }
+.wrap { max-width: 760px; margin: 0 auto; padding-block: 48px 72px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 40px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; line-height: 1.15; margin: 0; }
+h1 { font-size: clamp(2.2rem, 6vw, 3.4rem); font-weight: 800; letter-spacing: -0.02em; }
+h1 em { font-style: normal; color: var(--wine); }
+h2 { font-size: 1.6rem; font-weight: 800; }
+h3 { font-size: 1.15rem; font-weight: 600; }
+p { margin: 0; max-width: 65ch; }
+.lede { font-size: 1.15rem; color: var(--muted); }
+.eyebrow { font: 600 0.78rem var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--wine); }
+header { display: grid; gap: 14px; }
+.flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font: 600 0.9rem var(--mono); color: var(--muted); }
+.flow span { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 4px 10px; }
+.flow b { color: var(--wine); }
+section { display: grid; gap: 18px; }
+.phase-head { display: grid; gap: 6px; border-top: 2px solid var(--fg); padding-top: 14px; }
+ol.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: s var(--start, 0); }
+.step { counter-increment: s; position: relative; padding: 0 0 28px 56px; display: grid; gap: 10px; min-width: 0; }
+.step::before { content: counter(s); position: absolute; left: 0; top: 0; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font: 800 1rem var(--display); background: var(--wine-soft); color: var(--wine); }
+.step::after { content: ""; position: absolute; left: 17px; top: 42px; bottom: 6px; width: 2px; background: var(--line); }
+.step:last-child::after { display: none; }
+.step-title { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.done-box { display: inline-flex; gap: 6px; align-items: center; font-size: 0.85rem; color: var(--muted); cursor: pointer; margin-left: auto; }
+.done-box input { accent-color: var(--wine); width: 16px; height: 16px; }
+.step.is-done h3 { text-decoration: line-through; color: var(--muted); }
+.chip { font: 600 0.72rem var(--mono); letter-spacing: 0.04em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; }
+.chip.ok { background: var(--ok-bg); color: var(--ok); }
+.chip.soon { background: var(--soon-bg); color: var(--soon); }
+.term { position: relative; background: var(--term-bg); color: var(--term-fg); border-radius: 10px; padding: 14px 16px; padding-right: 84px; font: 0.88rem/1.55 var(--mono); overflow-x: auto; white-space: pre; }
+.term .c { color: #9a95a8; }
+.copy { position: absolute; top: 10px; right: 10px; font: 600 0.75rem var(--mono); background: #34313d; color: var(--term-fg); border: 0; border-radius: 6px; padding: 5px 10px; cursor: pointer; }
+.copy:focus-visible, .done-box input:focus-visible { outline: 2px solid var(--wine); outline-offset: 2px; }
+.note { font-size: 0.95rem; color: var(--muted); }
+code { font-family: var(--mono); font-size: 0.88em; background: var(--wine-soft); color: var(--fg); padding: 1px 5px; border-radius: 4px; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 0.95rem; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 600 0.75rem var(--mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+tr:last-child td { border-bottom: 0; }
+.where { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+.where div { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 4px; min-width: 0; }
+.where code { word-break: break-all; }
+footer { font-size: 0.9rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; }
+@media (prefers-reduced-motion: no-preference) { .step::before { transition: background .2s; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Cellier · macOS Apple Silicon</div>
+    <h1>Lancer un <em>.exe</em> Windows sur votre Mac</h1>
+    <p class="lede">Ce guide vous mène de zéro à un jeu ou logiciel Windows lancé d'un double-clic. Tout est gratuit et open source, à part les outils d'Apple, gratuits eux aussi.</p>
+    <div class="flow" aria-label="Chemin d'un programme Windows">
+      <span>jeu.exe</span>→<span>Wine</span>→<span><b>D3DMetal</b> ou DXVK</span>→<span>Metal</span>→<span>votre écran</span>
+    </div>
+  </header>
+
+  <section>
+    <div class="phase-head">
+      <div class="eyebrow">Partie 1 · une seule fois · ~15 min</div>
+      <h2>Préparer le Mac</h2>
+      <p class="note">Ouvrez l'app <strong>Terminal</strong> (Cmd+Espace, tapez « Terminal »), puis copiez chaque commande. Cochez les étapes au fur et à mesure : votre navigateur s'en souviendra.</p>
+    </div>
+    <ol class="steps" style="--start:0">
+      <li class="step" data-id="s1">
+        <div class="step-title"><h3>Vérifier que le Mac est Apple Silicon</h3><span class="chip ok">Disponible</span></div>
+        <p>La commande doit afficher <code>arm64</code>. Il faut aussi macOS 14 Sonoma ou plus récent (menu Pomme → À propos de ce Mac).</p>
+        <div class="term">uname -m</div>
+      </li>
+      <li class="step" data-id="s2">
+        <div class="step-title"><h3>Installer Rosetta 2</h3><span class="chip ok">Disponible</span></div>
+        <p>Wine est un programme Intel : Rosetta le fait tourner sur la puce Apple.</p>
+        <div class="term">softwareupdate --install-rosetta --agree-to-license</div>
+      </li>
+      <li class="step" data-id="s3">
+        <div class="step-title"><h3>Installer Homebrew</h3><span class="chip ok">Disponible</span></div>
+        <p>Le gestionnaire de paquets qui installera le reste. Suivez les deux lignes « Next steps » qu'il affiche à la fin.</p>
+        <div class="term">/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"</div>
+      </li>
+      <li class="step" data-id="s4">
+        <div class="step-title"><h3>Installer Wine avec D3DMetal, puis Winetricks</h3><span class="chip ok">Disponible</span></div>
+        <p>Ce paquet regroupe Wine et la couche D3DMetal du Game Porting Toolkit d'Apple. Winetricks installe les composants Windows (Visual C++, polices…).</p>
+        <div class="term">brew install --cask --no-quarantine gcenx/wine/game-porting-toolkit
+brew install winetricks</div>
+        <p class="note">Autre option : télécharger le Game Porting Toolkit sur <a href="https://developer.apple.com/games/game-porting-toolkit/">developer.apple.com</a> (compte Apple gratuit).</p>
+      </li>
+      <li class="step" data-id="s5">
+        <div class="step-title"><h3>Facultatif : DXVK pour les jeux récalcitrants</h3><span class="chip ok">Disponible</span></div>
+        <p>Certains jeux DirectX 9 à 11 fonctionnent mieux avec DXVK. Il passe par Vulkan, que MoltenVK traduit en Metal.</p>
+        <div class="term">brew install molten-vk</div>
+      </li>
+    </ol>
+  </section>
+
+  <section>
+    <div class="phase-head">
+      <div class="eyebrow">Partie 2 · pour chaque programme · ~5 min</div>
+      <h2>Lancer votre .exe avec Cellier</h2>
+      <p class="note">Une <strong>bouteille</strong> est un faux disque Windows 10 rangé dans un dossier. Elle est isolée du reste du Mac, et vous pouvez en avoir une par jeu. Les commandes <code>cellier</code> arrivent au fil des jalons du projet.</p>
+    </div>
+    <ol class="steps" style="--start:5">
+      <li class="step" data-id="s6">
+        <div class="step-title"><h3>Créer une bouteille</h3><span class="chip soon">Jalon 1</span></div>
+        <p>Cellier crée un Windows 10 64-bit et installe Visual C++ 2015-2022, les polices Windows et <code>d3dcompiler_47</code>. Comptez quelques minutes la première fois.</p>
+        <div class="term">cellier create MesJeux</div>
+      </li>
+      <li class="step" data-id="s7">
+        <div class="step-title"><h3>Installer ou lancer votre programme</h3><span class="chip soon">Jalon 3</span></div>
+        <p>Glissez le fichier dans le Terminal après le nom de la bouteille pour coller son chemin. Cellier accepte <code>.exe</code>, <code>.msi</code> et les images disque <code>.iso</code>, qu'il monte tout seul.</p>
+        <div class="term">cellier run MesJeux ~/Downloads/setup.exe</div>
+      </li>
+      <li class="step" data-id="s8">
+        <div class="step-title"><h3>Créer une icône pour lancer en un clic</h3><span class="chip soon">Jalon 4</span></div>
+        <p>Indiquez le chemin du programme installé, côté Windows. L'app apparaît dans <code>~/Applications/Cellier</code> : glissez-la dans le Dock.</p>
+        <div class="term">cellier shortcut MesJeux "C:\Games\MonJeu\MonJeu.exe" --name "Mon Jeu"</div>
+      </li>
+      <li class="step" data-id="s9">
+        <div class="step-title"><h3>Si l'image est noire ou le jeu plante</h3><span class="chip soon">Jalon 2</span></div>
+        <p>Changez de moteur graphique sans recréer la bouteille, puis relancez.</p>
+        <div class="term"><span class="c"># DirectX 9/10/11 récalcitrant : essayer DXVK</span>
+cellier config MesJeux --graphics dxvk --sync esync
+<span class="c"># Revenir au réglage par défaut (DirectX 11/12)</span>
+cellier config MesJeux --graphics d3dmetal --sync msync</div>
+      </li>
+    </ol>
+  </section>
+
+  <section>
+    <div class="phase-head">
+      <div class="eyebrow">Repères</div>
+      <h2>Quel réglage choisir ?</h2>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Réglage</th><th>Pour quoi</th><th>Quand l'utiliser</th></tr></thead>
+        <tbody>
+          <tr><td><code>d3dmetal</code></td><td>DirectX 11 et 12 → Metal (Apple)</td><td>Par défaut, jeux récents</td></tr>
+          <tr><td><code>dxvk</code></td><td>DirectX 9 à 11 → Vulkan → Metal</td><td>Jeux plus anciens, bugs graphiques avec D3DMetal</td></tr>
+          <tr><td><code>msync</code></td><td>Synchronisation des threads via Metal</td><td>Par défaut, le plus rapide</td></tr>
+          <tr><td><code>esync</code></td><td>Synchronisation par événements</td><td>Avec DXVK, ou si un jeu se fige avec MSync</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="where">
+      <div><h3>Vos bouteilles</h3><code>~/Library/Application Support/Cellier/Bottles</code></div>
+      <div><h3>Les journaux</h3><code>~/Library/Logs/Cellier</code><span class="note">À joindre à tout signalement de bug.</span></div>
+      <div><h3>Vos raccourcis</h3><code>~/Applications/Cellier</code></div>
+    </div>
+  </section>
+
+  <footer>Cellier est un projet open source sous licence MIT. Les jeux protégés par un anti-triche noyau (Valorant, Fortnite…) ne fonctionnent pas sous Wine, quel que soit l'outil.</footer>
+</div>
+
+<script>
+document.querySelectorAll('.term').forEach(t => {
+  const text = t.innerText.split('\n').filter(l => !l.trim().startsWith('#')).join('\n').trim();
+  const b = document.createElement('button');
+  b.className = 'copy'; b.type = 'button'; b.textContent = 'Copier';
+  b.addEventListener('click', () => {
+    const done = () => { b.textContent = 'Copié'; setTimeout(() => b.textContent = 'Copier', 1500); };
+    const fallback = () => { const r = document.createRange(); r.selectNodeContents(t); const s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Cmd+C'; };
+    try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
+  });
+  t.appendChild(b);
+});
+let saved = {};
+try { saved = JSON.parse(localStorage.getItem('cellier-steps') || '{}'); } catch (e) {}
+document.querySelectorAll('.step').forEach(li => {
+  const id = li.dataset.id;
+  const label = document.createElement('label');
+  label.className = 'done-box';
+  label.innerHTML = '<input type="checkbox" id="done-' + id + '"> Fait';
+  const box = label.firstChild;
+  box.checked = !!saved[id]; li.classList.toggle('is-done', box.checked);
+  box.addEventListener('change', () => {
+    saved[id] = box.checked; li.classList.toggle('is-done', box.checked);
+    try { localStorage.setItem('cellier-steps', JSON.stringify(saved)); } catch (e) {}
+  });
+  li.querySelector('.step-title').appendChild(label);
+});
+</script>

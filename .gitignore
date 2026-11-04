@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+build/
+dist/
+.mypy_cache/
+.ruff_cache/
+.DS_Store
+# Bouteilles et logs locaux (jamais dans le dépôt)
+Bottles/
+*.log

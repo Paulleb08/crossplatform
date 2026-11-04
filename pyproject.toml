@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cellier"
+version = "0.0.1"
+description = "Gestionnaire de bouteilles Wine/GPTK open source pour macOS Apple Silicon"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.11"
+dependencies = []  # stdlib uniquement, volontairement
+
+[project.scripts]
+cellier = "cellier.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.mypy]
+strict = true
+python_version = "3.11"
+mypy_path = "src"
