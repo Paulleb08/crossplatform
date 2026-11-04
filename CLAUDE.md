@@ -77,7 +77,7 @@ Une ligne par leçon : l'erreur, puis la règle.
 - Bascule DXVK appelée deux fois : la DLL DXVK était sauvegardée comme originale. Une sauvegarde ne se fait qu'au premier passage. Tester toute opération réversible par un aller-retour et un double appel.
 - `mypy` sans `files` dans `pyproject.toml` sort en erreur. Garder `files = ["src"]`.
 - Économie de tokens : regrouper les écritures de fichiers, lancer tests et mypy dans le même appel, ne pas relire un fichier qu'on vient d'écrire, éditer par un remplacement ciblé plutôt que tout réécrire.
-- Noms de paquets Homebrew tiers (`gcenx/wine/...`) non vérifiables hors ligne : les signaler comme à confirmer, ne pas les présenter comme sûrs.
+- Commandes tierces (paquets Homebrew…) : les valider dans la CI macOS (job `wine-e2e`) plutôt que les deviner. `gcenx/wine/game-porting-toolkit` et `winetricks vcrun2022` sont validés en CI (11/2026).
 - `rm -rf` dans une commande déclenche le hook destructif. Les artefacts de build sont déjà dans `.gitignore` : ne pas les supprimer, ne jamais mêler suppression et commit.
 - Revue par sous-agent, 8 bugs trouvés. Règles retenues :
   - l'identité d'une bouteille vient du dossier, jamais du JSON ;

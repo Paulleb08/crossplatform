@@ -75,6 +75,27 @@ footer { font-size: 0.9rem; color: var(--muted); border-top: 1px solid var(--lin
 
   <section>
     <div class="phase-head">
+      <div class="eyebrow">Le plus simple · ~2 min</div>
+      <h2>Installer l'app Cellier</h2>
+    </div>
+    <ol class="steps" style="--start:0">
+      <li class="step" data-id="d1">
+        <div class="step-title"><h3>Ouvrir Cellier.dmg et glisser Cellier dans Applications</h3><span class="chip ok">Disponible</span></div>
+        <p>Python est inclus dans l'app, il n'y a rien d'autre à installer pour Cellier lui-même. L'app n'est pas signée : au premier lancement, faites <strong>clic droit → Ouvrir</strong>, puis confirmez.</p>
+      </li>
+      <li class="step" data-id="d2">
+        <div class="step-title"><h3>Cliquer sur « Installer les prérequis… »</h3><span class="chip ok">Disponible</span></div>
+        <p>Un Terminal s'ouvre et installe Rosetta 2, Homebrew, Wine avec D3DMetal et Winetricks (10 à 20 min). Revenez ensuite dans Cellier et cliquez sur « Vérifier à nouveau ».</p>
+      </li>
+      <li class="step" data-id="d3">
+        <div class="step-title"><h3>Nouvelle bouteille, puis ▶ Lancer un programme</h3><span class="chip ok">Disponible</span></div>
+        <p>Choisissez votre <code>.exe</code>, <code>.msi</code> ou <code>.iso</code>. Une fois le jeu installé, « Créer un raccourci dans le Dock » le rend lançable en un clic. Les sections ci-dessous expliquent la même chose en ligne de commande.</p>
+      </li>
+    </ol>
+  </section>
+
+  <section>
+    <div class="phase-head">
       <div class="eyebrow">Partie 1 · une seule fois · ~15 min</div>
       <h2>Préparer le Mac</h2>
       <p class="note">Ouvrez l'app <strong>Terminal</strong> (Cmd+Espace, tapez « Terminal »), puis copiez chaque commande. Cochez les étapes au fur et à mesure : votre navigateur s'en souviendra.</p>

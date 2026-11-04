@@ -2,10 +2,11 @@
 
 Lancez vos logiciels et jeux Windows 64-bit sur un Mac Apple Silicon, avec uniquement des outils gratuits et open source.
 
+- **Installer** : téléchargez `Cellier.dmg` (artefact « Cellier-dmg » de la CI macOS, ou la release), glissez Cellier dans Applications, puis clic droit → Ouvrir au premier lancement.
 - Guide pas à pas pour lancer un `.exe` : [`docs/guide.html`](docs/guide.html)
 - Avancement : [`ROADMAP.md`](ROADMAP.md) · Règles de contribution : [`CLAUDE.md`](CLAUDE.md)
 
-> État : les 4 jalons sont codés et testés avec un faux Wine. Ils n'ont pas encore été validés sur un vrai Mac.
+> État : app graphique et CLI. La CI tourne sur macOS Apple Silicon : tests, montage ISO réel, ouverture de l'interface, DMG, et un essai Wine/GPTK réel (création d'une bouteille avec winetricks, puis `cmd.exe` → « Microsoft Windows 10.0.19043 »).
 
 ```bash
 git clone https://github.com/paulleb08/crossplatform && cd crossplatform
