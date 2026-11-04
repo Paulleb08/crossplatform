@@ -88,3 +88,4 @@ Une ligne par leçon : l'erreur, puis la règle.
   - les sauvegardes s'écrivent dans un `.tmp` puis par `rename` (atomique) ;
   - un PATH Homebrew explicite pour winetricks lancé depuis une `.app`.
 - Faire relire par un sous-agent avant de déclarer « fini » : une revue ciblée coûte peu de tokens et attrape ce que les tests écrits par l'auteur ne couvrent pas.
+- Un ` : ` dans une valeur YAML non quotée invalide tout le workflow (0 job lancé). Mettre les valeurs entre guillemets et valider avec `python3 -c "import yaml; yaml.safe_load(open(F))"` avant de pousser.

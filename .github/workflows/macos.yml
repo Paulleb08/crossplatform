@@ -1,4 +1,4 @@
-name: macOS (Apple Silicon) : tests, app et DMG
+name: "macOS Apple Silicon - tests, app et DMG"
 
 on:
   push:
